@@ -1,7 +1,7 @@
 import pytest
 import allure
 from pages.main_page import MainPage
-from ..data import ACCORDION_ANSWERS
+from data import ACCORDION_ANSWERS
 
 class TestAccordion:
 
@@ -20,3 +20,4 @@ class TestAccordion:
         actual_text = main_page.get_answer_text(index)
  
         assert actual_text == expected_text, f"Текст ответа для элемента {index} не совпадает!"
+        

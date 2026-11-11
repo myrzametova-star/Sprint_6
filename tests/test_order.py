@@ -19,11 +19,9 @@ class TestOrderFlow:
 
         main_page.open()
         main_page.accept_cookies()
-
         main_page.click_top_order_button()
 
         order_page.fill_client_info(name, surname, address, metro_station, phone)
-        
         order_page.fill_rent_info(date, duration, comment)
 
         success_text = order_page.get_success_modal_text()
@@ -42,15 +40,13 @@ class TestOrderFlow:
         main_page = MainPage(driver)
         order_page = OrderPage(driver)
 
-        # Открываем главную страницу и принимаем куки
         main_page.open()
         main_page.accept_cookies()
-
-        # Кликаем по нижней кнопке через метод MainPage (внутри него скрыт скролл и клик)
         main_page.click_bottom_order_button()
 
         order_page.fill_client_info(name, surname, address, metro_station, phone)
-        
         order_page.fill_rent_info(date, duration, comment)
 
+        # Добавили недостающий assert для второго теста
         success_text = order_page.get_success_modal_text()
+        assert "Заказ оформлен" in success_text, f"Окно успешного заказа не появилось. Фактический текст: {success_text}"

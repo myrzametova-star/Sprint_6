@@ -1,59 +1,42 @@
-import allure
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from ..data import BASE_URL # Импортируем URL из файла констант
+from pages.base_page import BasePage
+from locators.main_page_locators import MainPageLocators
+from data import BASE_URL 
 
-class MainPage:
-    def __init__(self, driver):
-        self.driver = driver
-        self.url = BASE_URL  
-
-    TOP_ORDER_BUTTON = (By.XPATH, ".//button[text()='Заказать']")
-    BOTTOM_ORDER_BUTTON = (By.XPATH, ".//div[contains(@class, 'Home_FinishButton')]/button")
-    COOKIE_ACCEPT_BUTTON = (By.ID, "rcc-confirm-button")
-
-    def get_question_locator(self, index):
-        return (By.ID, f"accordion__heading-{index}")
-
-    def get_answer_locator(self, index):
-        return (By.ID, f"accordion__panel-{index}")
-
-    @allure.step("Открыть главную страницу Самоката")
+class MainPage(BasePage):
+    
     def open(self):
-        self.driver.get(self.url)
+        """Открыть главную страницу"""
+        self.open_url(BASE_URL)
 
-    @allure.step("Принять куки, если окно появилось")
+    def open_main_page(self):
+        self.open()
+
     def accept_cookies(self):
+        """Принять куки, если кнопка появится, иначе просто продолжить тест"""
         try:
-            WebDriverWait(self.driver, 3).until(EC.element_to_be_clickable(self.COOKIE_ACCEPT_BUTTON)).click()
-        except:
+            self.click_element(MainPageLocators.COOKIE_ACCEPT_BUTTON, timeout=3)
+        except Exception:
             pass
 
-    @allure.step("Кликнуть на вопрос номер {index}")
-    def click_question(self, index):
-        question_locator = self.get_question_locator(index)
-        element = self.driver.find_element(*question_locator)
-        self.driver.execute_script("arguments.scrollIntoView();", element)
-        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(question_locator)).click()
-
-    @allure.step("Получить текст ответа номер {index}")
-    def get_answer_text(self, index):
-        # Сначала кликаем по вопросу, чтобы ответ раскрылся
-        self.click_question(index)
-        
-        answer_locator = self.get_answer_locator(index)
-        element = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located(answer_locator)
-        )
-        return element.text
-
-    @allure.step("Кликнуть на верхнюю кнопку 'Заказать'")
     def click_top_order_button(self):
-        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.TOP_ORDER_BUTTON)).click()
+        """Кликнуть по верхней кнопке 'Заказать'"""
+        self.click_element(MainPageLocators.TOP_ORDER_BUTTON)
 
-    @allure.step("Кликнуть на нижнюю кнопку 'Заказать'")
     def click_bottom_order_button(self):
-        element = self.driver.find_element(*self.BOTTOM_ORDER_BUTTON)
+        """Кликнуть по нижней кнопке 'Заказать'"""
+        element = self.find_element(MainPageLocators.BOTTOM_ORDER_BUTTON)
         self.driver.execute_script("arguments.scrollIntoView();", element)
-        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.BOTTOM_ORDER_BUTTON)).click()
+        self.click_element(MainPageLocators.BOTTOM_ORDER_BUTTON)
+
+    def get_answer_text(self, index):
+        """Скроллит к вопросу, кликает по нему и возвращает текст ответа"""
+        question_locator = MainPageLocators.get_question_locator(index)
+        answer_locator = MainPageLocators.get_answer_locator(index)
+
+        question_element = self.find_element(question_locator)
+        self.driver.execute_script("arguments.scrollIntoView();", question_element)
+
+        self.click_element(question_locator)
+
+        answer_element = self.find_element(answer_locator)
+        return answer_element.text
